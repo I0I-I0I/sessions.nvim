@@ -7,18 +7,20 @@ local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local dropdown = require("telescope.themes").get_dropdown()
 
-M.var = {}
+M.opts = {}
 
-M.var.marker = "FOR_TELESCOPE"
-M.var.dirs = {}
+M.opts.marker = "FOR_TELESCOPE"
+M.opts.dirs = {}
+M.opts.path = "~/sessions/"
+M.opts.attach_after_enter = true
 
 function M.setup(opts)
-	M.var.path = opts.path or "~/sessions/"
-	M.var.attach_after_enter = opts.attach_after_enter or false
+	M.opts.path = opts.path
+	M.opts.attach_after_enter = opts.attach_after_enter
 end
 
 function M.attach_session()
-	vim.cmd("silent source " .. M.var.path .. vim.fn.getcwd():gsub("/", ":") .. ".vim")
+	vim.cmd("silent source " .. M.opts.path .. vim.fn.getcwd():gsub("/", ":") .. ".vim")
 end
 
 local function delete_session(prompt_bufnr)
@@ -26,14 +28,14 @@ local function delete_session(prompt_bufnr)
 	local selected = action_state.get_selected_entry()[1]
 	local selected_copy = selected:sub(1, -1)
 	selected = selected:gsub(" ", "_")
-	local dir = M.var.dirs[selected]
+	local dir = M.opts.dirs[selected]
 	local file = dir:gsub("/", ":"):sub(1, -1) .. ".vim"
 
-	vim.cmd("silent !rm -rf " .. M.var.path .. file)
+	vim.cmd("silent !rm -rf " .. M.opts.path .. file)
 	vim.cmd(
 		"silent !rm -rf "
-		.. M.var.path
-		.. M.var.marker
+		.. M.opts.path
+		.. M.opts.marker
 		.. "\\(" .. selected:gsub('"', '\\"'):sub(1, -1) .. "\\)"
 		.. file
 	)
@@ -46,25 +48,25 @@ function M.enter(prompt_bufnr)
 	local selected = action_state.get_selected_entry()
 	local dir = selected[1]:gsub(" ", "_")
 
-	vim.cmd("cd " .. M.var.dirs[dir])
+	vim.cmd("cd " .. M.opts.dirs[dir])
 
-	if M.var.attach_after_enter then
+	if M.opts.attach_after_enter then
 		M.attach_session()
 	end
 end
 
 local function get_dirs()
-	M.var.dirs = {}
-	for k, _ in vim.fn.execute("!ls " .. M.var.path):gmatch("[A-Za-z_.:|0-9()\"'\\-]+.vim") do
+	M.opts.dirs = {}
+	for k, _ in vim.fn.execute("!ls " .. M.opts.path):gmatch("[A-Za-z_.:|0-9()\"'\\-]+.vim") do
 		local dir = k:gsub(":", "/"):sub(1, -5)
-		if dir:match(M.var.marker) then
+		if dir:match(M.opts.marker) then
 			local session_name = dir:match("[(](.+)[)]")
-			dir = dir:match(M.var.marker .. "[(].+[)](.*)")
+			dir = dir:match(M.opts.marker .. "[(].+[)](.*)")
 
-			M.var.dirs[session_name] = dir
+			M.opts.dirs[session_name] = dir
 		end
 	end
-	return M.var.dirs
+	return M.opts.dirs
 end
 
 local function get_options()
@@ -92,7 +94,7 @@ local function get_options()
 end
 
 function M.save_session()
-	vim.cmd("mksession! " .. M.var.path .. vim.fn.getcwd():gsub("/", ":") .. ".vim")
+	vim.cmd("mksession! " .. M.opts.path .. vim.fn.getcwd():gsub("/", ":") .. ".vim")
 end
 
 function M.create_session()
@@ -106,8 +108,8 @@ function M.create_session()
 	prompt = prompt:gsub('"', '\\"')
 	vim.cmd(
 		"silent !touch "
-		.. M.var.path
-		.. M.var.marker
+		.. M.opts.path
+		.. M.opts.marker
 		.. "\\(" .. prompt .. "\\)"
 		.. vim.fn.getcwd():gsub("/", ":")
 		.. ".vim"
