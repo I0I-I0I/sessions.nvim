@@ -1,0 +1,73 @@
+# sessions.nvim
+
+A simple plugin for managing sessions in Neovim.
+
+## Features
+
+- Create and load sessions
+- Delete sessions
+- List sessions
+- Rename sessions
+
+## Installation
+
+Using [lazy.nvim](https://github.com/folke/lazy.nvim):
+
+```lua
+local M = { "i0i-i0i/sessions.nvim" }
+
+M.dependencies = {
+    "nvim-telescope/telescope.nvim"
+}
+
+M.opts = {
+	path = "path/to/sessions_folder", -- default = "~/sessions"
+	attach_after_enter = true -- if false just change cwd
+}
+
+M.keys = {
+    { "<leader>ss", "<cmd>SessionSave<cr>", desc = "Save session" },
+    { "<leader>sc", "<cmd>SessionCreate<cr>", desc = "Create session" },
+    { "<leader>sa", "<cmd>SessionAttach<cr>", desc = "Attach session" },
+    { "<leader>sl", "<cmd>SessionsList<cr>", desc = "List sessions" },
+}
+
+return M
+```
+
+## Default commands
+
+Create new session for current path:
+
+```lua
+vim.api.nvim_create_user_command("SessionCreate", function()
+	sessions.create_session()
+end, {})
+```
+
+Show sessions list in telescope:
+
+```lua
+vim.api.nvim_create_user_command("SessionsList", function()
+	sessions.open_list()
+end, {})
+```
+
+Save current session:
+
+```lua
+vim.api.nvim_create_user_command("SessionSave", function()
+	sessions.save_session()
+end, {})
+```
+
+Find session (in opts.path) for current path and attach, if not found print error:
+
+```lua
+vim.api.nvim_create_user_command("SessionAttach", function()
+	local _, err = pcall(sessions.attach_session)
+	if err then
+		print("Cann't found session here")
+	end
+end, {})
+```
