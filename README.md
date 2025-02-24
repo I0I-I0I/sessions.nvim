@@ -7,7 +7,6 @@ A simple plugin for managing sessions in Neovim.
 - Create and load sessions
 - Delete sessions
 - List sessions
-- Rename sessions
 
 ## Installation
 
@@ -17,12 +16,13 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 local M = { "i0i-i0i/sessions.nvim" }
 
 M.dependencies = {
-    "nvim-telescope/telescope.nvim"
+    "nvim-telescope/telescope.nvim",
+    "nvim-lua/plenary.nvim"
 }
 
 M.opts = {
-	path = "path/to/sessions_folder", -- default = "~/sessions"
-	attach_after_enter = true -- if false just change cwd
+    path = "path/to/sessions_folder", -- default = "~/sessions"
+    attach_after_enter = true -- if false just change cwd
 }
 
 M.keys = {
@@ -41,7 +41,7 @@ Create new session for current path:
 
 ```lua
 vim.api.nvim_create_user_command("SessionCreate", function()
-	sessions.create_session()
+    sessions.create_session()
 end, {})
 ```
 
@@ -49,7 +49,7 @@ Show sessions list in telescope:
 
 ```lua
 vim.api.nvim_create_user_command("SessionsList", function()
-	sessions.open_list()
+    sessions.open_list()
 end, {})
 ```
 
@@ -57,7 +57,7 @@ Save current session:
 
 ```lua
 vim.api.nvim_create_user_command("SessionSave", function()
-	sessions.save_session()
+    sessions.save_session()
 end, {})
 ```
 
@@ -65,9 +65,24 @@ Find session (in opts.path) for current path and attach, if not found print erro
 
 ```lua
 vim.api.nvim_create_user_command("SessionAttach", function()
-	local _, err = pcall(sessions.attach_session)
-	if err then
-		print("Cann't found session here")
-	end
+    local _, err = pcall(sessions.attach_session)
+    if err then
+        print("Cann't found session here")
+    end
 end, {})
+```
+
+## Telescope maps
+
+```lua
+{
+    ["n"] = {
+        ["dd"] = delete_session,
+        ["<CR>"] = attach_session,
+    },
+    ["i"] = {
+        ["<C-d>"] = delete_session,
+        ["<CR>"] = attach_session,
+    }
+}
 ```
