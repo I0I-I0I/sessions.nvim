@@ -9,7 +9,7 @@ local dropdown = require("telescope.themes").get_dropdown()
 
 M.opts = {}
 
-M.opts.marker = "FOR_TELESCOPE"
+M.opts.marker = "FOR_MARKER"
 M.opts.dirs = {}
 M.opts.path = "~/sessions/"
 M.opts.attach_after_enter = true
